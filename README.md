@@ -9,6 +9,8 @@ An installable, local-first parent coaching PWA. Built with plain HTML, CSS, and
 - Daily checklist, bathroom event log, training ladder, progress summaries, weekly reflection
 - IndexedDB persistence, offline service worker, JSON backup and import
 - No cloud account or Supabase connection yet
+- One-tap Today logging with Undo and optional notes and comfort; quick entries leave comfort unrecorded
+- Today phrase favorites across strategies, recent notes, and factual seven-day summaries
 
 ## GitHub Pages deployment
 1. Create a **public** GitHub repository.
@@ -28,4 +30,8 @@ Supabase is **not implemented**. A later authenticated sync layer needs private 
 This app does not send notifications. Use the existing ChatGPT daily reminder or a phone reminder.
 
 ## Development notes
+Run focused interaction and data checks with `node --test tests/ux.test.cjs`.
+
+Colors use the complete Tailwind v4.3.0 OKLCH palette (26 families, 11 shades each, plus black and white) in `colors.css` (MIT license in `TAILWIND-LICENSE.txt`). Light and dark semantic tokens live at the top of `styles.css`; components use those aliases rather than raw palette values. Mist neutrals support Sky primary actions, Blue practice accents, Amber rewards, and Blue secondary states. No Tailwind runtime, CDN, or build step is required. Run theme and contrast checks with `node --test tests/colors.test.cjs`.
+
 This is an initial prototype and has not been validated in Safari on a physical iPhone. Browser tests and parent usability testing are recommended before routine reliance. Coaching suggestions are not medical advice. Contact a pediatrician for painful stools, suspected constipation, withholding, or persistent soiling.

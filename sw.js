@@ -1,1 +1,30 @@
-const CACHE='theos-potty-pal-v2.9.0';const ASSETS=['./','./index.html','./styles.css','./app.js','./manifest.webmanifest','./icons/icon.svg','./icons/icon-192.png','./icons/icon-512.png'];self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()))});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});self.addEventListener('fetch',e=>{if(e.request.method!=='GET'||new URL(e.request.url).origin!==self.location.origin)return;e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request).then(r=>{if(r.ok){const copy=r.clone();caches.open(CACHE).then(cache=>cache.put(e.request,copy))}return r})))})
+const VERSION='2.12.4';
+const CACHE='theos-potty-pal-v'+VERSION;
+const ASSETS=['./','./index.html','./colors.css?v='+VERSION,'./styles.css?v='+VERSION,'./app.js?v='+VERSION,'./manifest.webmanifest?v='+VERSION,'./icons/icon.svg?v='+VERSION,'./icons/icon-dark.svg?v='+VERSION,'./icons/icon-192.png?v='+VERSION,'./icons/icon-512.png?v='+VERSION];
+self.addEventListener('install',event=>{
+  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS.map(url=>new Request(url,{cache:'reload'})))).then(()=>self.skipWaiting()));
+});
+self.addEventListener('activate',event=>{
+  event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('theos-potty-pal-v')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));
+});
+self.addEventListener('fetch',event=>{
+  const request=event.request;
+  if(request.method!=='GET'||new URL(request.url).origin!==self.location.origin)return;
+  event.respondWith((async()=>{
+    const cache=await caches.open(CACHE);
+    // Fresh HTML points to matching versioned assets; offline visits retain the cached app.
+    if(request.mode==='navigate'){
+      try{
+        const response=await fetch(new Request(request,{cache:'no-store'}));
+        if(response.ok){await cache.put(request,response.clone());return response}
+      }catch{}
+      const saved=await cache.match(request)||await cache.match('./index.html');
+      return saved||Response.error();
+    }
+    const saved=await cache.match(request);
+    if(saved)return saved;
+    const response=await fetch(request);
+    if(response.ok)await cache.put(request,response.clone());
+    return response;
+  })());
+});
